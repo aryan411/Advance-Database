@@ -1,0 +1,35 @@
+-- Display what's in employee
+SELECT *
+  FROM employee;
+--
+
+DECLARE
+  incr NUMBER(7,2);
+  annual NUMBER(6);
+  new NUMBER(8,2);
+  newmo NUMBER(7,2);
+  total NUMBER(9,2) :=0;
+  CURSOR  cur_emp IS
+    SELECT  empno, ename, sal
+    FROM  employee
+    WHERE job <> 'PRESIDENT'
+      FOR UPDATE OF sal NOWAIT;
+BEGIN
+  FOR rec_emp IN cur_emp LOOP
+    annual := rec_emp.sal * 12;
+    incr := annual * .06;
+    IF incr > 2000 THEN
+      incr := 2000;
+    END IF;
+    new :=  annual + incr;
+    newmo := ROUND(new/12,2);
+    total := total + incr;
+    UPDATE employee
+      SET sal = newmo
+      WHERE CURRENT OF cur_emp;
+      DBMS_OUTPUT.PUT_LINE(rec_emp.empno || ' ' || rec_emp.ename ||
+                           ' ' || annual || ' ' || incr || ' ' || new);
+  END LOOP;
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Overall Cost: ' || total);
+END;

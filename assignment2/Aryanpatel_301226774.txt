@@ -1,0 +1,82 @@
+-- Question 4-8
+SET SERVEROUTPUT ON
+DECLARE
+  increase NUMBER(7,2);
+  anl NUMBER(6);
+  nw NUMBER(8,2);
+  nwmo NUMBER(7,2);
+  ttl NUMBER(9,2) =0;
+  CURSOR  crsemp IS
+    SELECT  empno, ename, sal
+    FROM  employee
+    WHERE job != 'PRESIDENT'
+      FOR UPDATE OF sal NOWAIT;
+BEGIN
+DBMS_OUTPUT.PUT_LINE(rec_emp.ename ' '  rec_emp.empno  
+                           ' '  anl  ' '  increase  ' '  nw);
+  FOR rec_emp IN crsemp LOOP
+    anl = rec_emp.sal  12;
+    increase = anl  .06;
+    IF increase  2000 THEN
+      increase = 2000;
+    END IF;
+    nw =  anl + increase;
+    nwmo = ROUND(nw12,2);
+    ttl = ttl + increase;
+    UPDATE employee
+      SET sal = nwmo
+      WHERE CURRENT OF crsemp;
+      DBMS_OUTPUT.PUT_LINE(rec_emp.ename ' '  rec_emp.empno  
+                           ' '  anl  ' '  increase  ' '  nw);
+  END LOOP;
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Toatal amount '  ttl);
+END;
+
+--Question 4-9
+
+SET SERVEROUTPUT ON
+DECLARE
+    plg_id DD_Pledge.idPledge%TYPE;
+    plg_amount DD_Pledge.Pledgeamt%TYPE;
+    plg_months DD_Pledge.paymonths%TYPE;
+    plg_first DD_Pledge.Firstpledge%TYPE;
+    plg_date DD_payment.paydate%TYPE;
+    dd_amount DD_payment.payamt%Type;
+    
+    CURSOR plgcursor(d_id number) IS 
+    SELECT idpledge, dd.pledgeamt, dd.paymonths, dd.Firstpledge, dp.paydate, dp.payamt
+      FROM dd_pledge dd INNER JOIN dd_payment dp
+        USING (idpledge)
+        Where dd.iddonor = d_id
+        ORDER BY idpledge ASC, dp.paydate ASC;
+BEGIN
+    OPEN plgcursor(303);
+    DBMS_OUTPUT.PUT_LINE('idPledge' '  ''Pledgeamt''  ''paymonths''  ''paydate''  ''payamount');
+    LOOP
+        FETCH plgcursor INTO plg_id, plg_amount, plg_months, plg_first, plg_date, dd_amount;
+        IF(plg_first = 'N') THEN
+            DBMS_OUTPUT.PUT_LINE(plg_id '        'plg_amount'        'plg_months'          'plg_date'          'dd_amount);
+        ELSE 
+            DBMS_OUTPUT.PUT_LINE(plg_id '        'plg_amount'        'plg_months'          'plg_date'          'dd_amount'  First Payment');
+        END IF;
+        EXIT WHEN plgcursor%NOTFOUND;
+    END LOOP;
+END;
+
+-- Question 4-13
+
+SET SERVEROUTPUT ON
+DECLARE
+  oldID dd_donor.iddonor%TYPE = 301;
+  newID dd_donor.iddonor%TYPE = 305;
+  ex_donor_pk EXCEPTION;
+  PRAGMA EXCEPTION_INIT(ex_donor_pk, -0001);
+BEGIN
+  UPDATE dd_donor
+   SET iddonor = newID
+   WHERE iddonor = oldID;
+EXCEPTION
+  WHEN ex_donor_pk THEN
+    DBMS_OUTPUT.PUT_LINE('ID is already Exits');
+END;

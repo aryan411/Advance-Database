@@ -1,0 +1,54 @@
+-- Ans 1
+SELECT officers.OFFICER_ID, officers.LAST, officers.FIRST
+FROM crime_officers INNER JOIN officers 
+ON crime_officers.OFFICER_ID = officers.OFFICER_ID 
+GROUP BY officers.OFFICER_ID, officers.LAST, officers.FIRST 
+HAVING COUNT(*)>(SELECT COUNT(*) / COUNT(DISTINCT OFFICER_ID) FROM crime_officers);
+
+--Ans 2
+
+SELECT criminals.CRIMINAL_ID, criminals.LAST, criminals.FIRST
+FROM criminals INNER JOIN  crimes
+ON criminals.CRIMINAL_ID = crimes.CRIMINAL_ID
+GROUP BY criminals.CRIMINAL_ID, criminals.LAST, criminals.FIRST 
+HAVING(COUNT(*)<(SELECT COUNT(*) / COUNT(DISTINCT CRIMINAL_ID) FROM crimes));
+
+--Ans 3
+
+SELECT APPEAL_ID, CRIME_ID, FILING_DATE, HEARING_DATE, STATUS 
+FROM APPEALS 
+WHERE (HEARING_DATE-FILING_DATE)<(SELECT AVG((HEARING_DATE - FILING_DATE)) FROM APPEALS);
+
+--Ans 4
+
+SELECT s.PROB_ID, k.LAST, k.FIRST 
+FROM prob_officers  k 
+JOIN sentences s
+ON s.PROB_ID = k.PROB_ID
+GROUP BY k.FIRST, k.LAST, s.prob_id 
+HAVING COUNT(*) >= (SELECT COUNT(*) / COUNT(DISTINCT CRIMINAL_ID) FROM sentences);
+
+--Ans 5
+
+SELECT DISTINCT p.CRIME_ID 
+FROM crimes p JOIN appeals b 
+ON p.CRIME_ID = b.CRIME_ID 
+GROUP BY p.CRIME_ID
+HAVING COUNT(b.CRIME_ID)=(SELECT MAX(Count(*)) from appeals a GROUP BY CRIME_ID);
+
+-- Ans 6
+
+SELECT * 
+FROM crime_charges p 
+WHERE p.FINE_AMOUNT > (SELECT AVG(NVL(FINE_AMOUNT,0)) 
+                        FROM crime_charges)
+                        AND p.AMOUNT_PAID <(SELECT AVG(NVL(FINE_AMOUNT,0)) FROM crime_charges);
+
+-- Ans 7
+
+SELECT cl.FIRST, cl.LAST, cm.CRIME_ID 
+FROM criminals cl INNER JOIN crimes cm 
+ON cl.CRIMINAL_ID = cm.CRIMINAL_ID
+INNER JOIN crime_charges ch 
+ON ch.CRIME_ID = cm.CRIME_ID 
+WHERE ch.CRIME_ID='10091';
